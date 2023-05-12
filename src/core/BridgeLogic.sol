@@ -43,7 +43,7 @@ contract BridgeLogic is IBridgeLogic, Ownable, Pausable {
         bytes calldata _payload,
         bytes calldata _sigs,
         uint256 _gasLimit
-    ) external override {
+    ) external override whenNotPaused {
         require(
             IBridgeData(dataAddr).isInWhiteListTo(_dstAddress),
             "INVALID_TO"
@@ -68,7 +68,6 @@ contract BridgeLogic is IBridgeLogic, Ownable, Pausable {
             );
         }
 
-        IBridgeData(dataAddr).markDoneFromLogic(_srcChainID, _nonce);
         IBridgeProxy(proxyAddr).receivePayloadFromLogic(
             _srcChainID,
             _nonce,

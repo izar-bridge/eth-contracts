@@ -8,7 +8,7 @@ interface IBridgeData {
 
     function updateKeepersFromLogic(address[] calldata _newKeepers) external;
 
-    function markDoneFromLogic(uint16 _srcChainID, uint256 _nonce) external;
+    function markDoneFromProxy(uint16 _srcChainID, uint256 _nonce) external;
 
     function getKeepers() external view returns (address[] memory);
 

@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import "openzeppelin-contracts/contracts/security/Pausable.sol";
+import "./interfaces/IBridgeData.sol";
 import "../libs/Utils.sol";
 import "./interfaces/IReceiver.sol";
 
@@ -24,7 +25,13 @@ contract BridgeProxy is Ownable, ReentrancyGuard {
     );
 
     address public logic;
+    address public data;
     uint256 public nonce;
+
+    function setData(address _data) external onlyOwner {
+        require(data == address(0), "ALREADY_SET");
+        data = _data;
+    }
 
     function upgradeLogic(address _logic) external onlyOwner {
         logic = _logic;
@@ -50,6 +57,8 @@ contract BridgeProxy is Ownable, ReentrancyGuard {
         uint256 _gasLimit
     ) external nonReentrant {
         require(msg.sender == logic, "INVALID_SENDER");
+
+        IBridgeData(data).markDoneFromProxy(_srcChainID, _nonce);
 
         require(
             IReceiver(_dstAddress).onReceive{gas: _gasLimit}(

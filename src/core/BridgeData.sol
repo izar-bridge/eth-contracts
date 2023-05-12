@@ -15,11 +15,7 @@ contract BridgeData is IBridgeData, Ownable {
     mapping(address => bool) public whiteListToContractMap;
     mapping(uint16 => mapping(uint256 => bool)) doneMap;
 
-    constructor(
-        uint16 _chainID,
-        address _proxy,
-        address[] memory _keepers
-    ) {
+    constructor(uint16 _chainID, address _proxy, address[] memory _keepers) {
         chainID = _chainID;
         proxy = _proxy;
         keepers = _keepers;
@@ -45,34 +41,28 @@ contract BridgeData is IBridgeData, Ownable {
         delete whiteListToContractMap[addr];
     }
 
-    function markDoneFromLogic(uint16 _srcChainID, uint256 _nonce) external {
-        require(msg.sender == IBridgeProxy(proxy).logic());
+    function markDoneFromProxy(uint16 _srcChainID, uint256 _nonce) external {
+        require(msg.sender == proxy, "!PROXY");
 
         require(!doneMap[_srcChainID][_nonce], "ALREADY_DONE");
         doneMap[_srcChainID][_nonce] = true;
     }
 
     function updateKeepersFromLogic(address[] calldata _newKeepers) external {
-        require(msg.sender == IBridgeProxy(proxy).logic(), "INVALID_SENDER");
+        require(msg.sender == IBridgeProxy(proxy).logic(), "!LOGIC");
 
         keepers = _newKeepers;
     }
 
-    function isInWhiteListFrom(address addr)
-        external
-        view
-        override
-        returns (bool)
-    {
+    function isInWhiteListFrom(
+        address addr
+    ) external view override returns (bool) {
         return whiteListFromMap[addr];
     }
 
-    function isInWhiteListTo(address addr)
-        external
-        view
-        override
-        returns (bool)
-    {
+    function isInWhiteListTo(
+        address addr
+    ) external view override returns (bool) {
         return whiteListToContractMap[addr];
     }
 }
