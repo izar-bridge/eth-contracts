@@ -2,11 +2,9 @@
 pragma solidity ^0.8.13;
 
 library Utils {
-    function bytesToBytes32(bytes memory _bs)
-        internal
-        pure
-        returns (bytes32 value)
-    {
+    function bytesToBytes32(
+        bytes memory _bs
+    ) internal pure returns (bytes32 value) {
         require(_bs.length == 32, "bytes length is not 32.");
         assembly {
             // load 32 bytes from memory starting from position _bs + 0x20 since the first 0x20 bytes stores _bs length
@@ -14,11 +12,9 @@ library Utils {
         }
     }
 
-    function bytesToAddress(bytes memory _bs)
-        internal
-        pure
-        returns (address addr)
-    {
+    function bytesToAddress(
+        bytes memory _bs
+    ) internal pure returns (address addr) {
         require(_bs.length == 20, "bytes length does not match address");
         assembly {
             // for _bs, first word store _bs.length, second word store _bs.value
@@ -27,11 +23,9 @@ library Utils {
         }
     }
 
-    function addressToBytes(address _addr)
-        internal
-        pure
-        returns (bytes memory bs)
-    {
+    function addressToBytes(
+        address _addr
+    ) internal pure returns (bytes memory bs) {
         assembly {
             bs := mload(0x40)
             mstore(bs, 0x14)
@@ -40,11 +34,10 @@ library Utils {
         }
     }
 
-    function sliceToBytes32(bytes memory _bytes, uint256 _start)
-        internal
-        pure
-        returns (bytes32 result)
-    {
+    function sliceToBytes32(
+        bytes memory _bytes,
+        uint256 _start
+    ) internal pure returns (bytes32 result) {
         require(_bytes.length >= (_start + 32));
         assembly {
             result := mload(add(add(_bytes, 0x20), _start))
@@ -94,22 +87,18 @@ library Utils {
         }
     }
 
-    function bytesToUint256(bytes memory _bs)
-        internal
-        pure
-        returns (uint256 value)
-    {
+    function bytesToUint256(
+        bytes memory _bs
+    ) internal pure returns (uint256 value) {
         require(_bs.length == 32, "bytes length is not 32.");
         assembly {
             value := mload(add(_bs, 0x20))
         }
     }
 
-    function uint256ToBytes(uint256 _value)
-        internal
-        pure
-        returns (bytes memory bs)
-    {
+    function uint256ToBytes(
+        uint256 _value
+    ) internal pure returns (bytes memory bs) {
         assembly {
             bs := mload(0x40)
             mstore(bs, 0x20)
@@ -169,11 +158,9 @@ library Utils {
         return containMAddresses(_keepers, signers, _m);
     }
 
-    function dedupAddress(address[] memory _dup)
-        internal
-        pure
-        returns (address[] memory)
-    {
+    function dedupAddress(
+        address[] memory _dup
+    ) internal pure returns (address[] memory) {
         address[] memory dedup = new address[](_dup.length);
         uint256 idx = 0;
         bool dup;
@@ -195,5 +182,85 @@ library Utils {
         }
 
         return dedup;
+    }
+
+    function equalStorage(
+        bytes storage _preBytes,
+        bytes memory _postBytes
+    ) internal view returns (bool) {
+        bool success = true;
+
+        assembly {
+            // we know _preBytes_offset is 0
+            let fslot := sload(_preBytes.slot)
+            // Arrays of 31 bytes or less have an even value in their slot,
+            // while longer arrays have an odd value. The actual length is
+            // the slot divided by two for odd values, and the lowest order
+            // byte divided by two for even values.
+            // If the slot is even, bitwise and the slot with 255 and divide by
+            // two to get the length. If the slot is odd, bitwise and the slot
+            // with -1 and divide by two.
+            let slength := div(
+                and(fslot, sub(mul(0x100, iszero(and(fslot, 1))), 1)),
+                2
+            )
+            let mlength := mload(_postBytes)
+
+            // if lengths don't match the arrays are not equal
+            switch eq(slength, mlength)
+            case 1 {
+                // fslot can contain both the length and contents of the array
+                // if slength < 32 bytes so let's prepare for that
+                // v. http://solidity.readthedocs.io/en/latest/miscellaneous.html#layout-of-state-variables-in-storage
+                // slength != 0
+                if iszero(iszero(slength)) {
+                    switch lt(slength, 32)
+                    case 1 {
+                        // blank the last byte which is the length
+                        fslot := mul(div(fslot, 0x100), 0x100)
+
+                        if iszero(eq(fslot, mload(add(_postBytes, 0x20)))) {
+                            // unsuccess:
+                            success := 0
+                        }
+                    }
+                    default {
+                        // cb is a circuit breaker in the for loop since there's
+                        //  no said feature for inline assembly loops
+                        // cb = 1 - don't breaker
+                        // cb = 0 - break
+                        let cb := 1
+
+                        // get the keccak hash to get the contents of the array
+                        mstore(0x0, _preBytes.slot)
+                        let sc := keccak256(0x0, 0x20)
+
+                        let mc := add(_postBytes, 0x20)
+                        let end := add(mc, mlength)
+
+                        // the next line is the loop condition:
+                        // while(uint(mc < end) + cb == 2)
+                        for {
+
+                        } eq(add(lt(mc, end), cb), 2) {
+                            sc := add(sc, 1)
+                            mc := add(mc, 0x20)
+                        } {
+                            if iszero(eq(sload(sc), mload(mc))) {
+                                // unsuccess:
+                                success := 0
+                                cb := 0
+                            }
+                        }
+                    }
+                }
+            }
+            default {
+                // unsuccess:
+                success := 0
+            }
+        }
+
+        return success;
     }
 }

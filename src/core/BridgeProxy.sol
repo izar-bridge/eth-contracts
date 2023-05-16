@@ -5,10 +5,11 @@ import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import "openzeppelin-contracts/contracts/security/Pausable.sol";
 import "./interfaces/IBridgeData.sol";
+import "./interfaces/IBridgeProxy.sol";
 import "../libs/Utils.sol";
 import "./interfaces/IReceiver.sol";
 
-contract BridgeProxy is Ownable, ReentrancyGuard {
+contract BridgeProxy is IBridgeProxy, Ownable, ReentrancyGuard {
     event Packet(
         address sender,
         uint256 nonce,
@@ -17,7 +18,7 @@ contract BridgeProxy is Ownable, ReentrancyGuard {
         bytes payload
     );
     event StoredPacket(
-        uint16 srcChainID,
+        uint64 srcChainID,
         bytes srcAddress,
         address dstAddress,
         uint256 nonce,

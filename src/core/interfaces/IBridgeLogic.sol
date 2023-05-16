@@ -18,6 +18,8 @@ interface IBridgeLogic {
         uint256 _gasLimit
     ) external;
 
-    function updateKeepers(address[] calldata _newKeepers, bytes calldata _sigs)
-        external;
+    function updateKeepers(
+        address[] calldata _newKeepers,
+        bytes calldata _sigs
+    ) external;
 }
