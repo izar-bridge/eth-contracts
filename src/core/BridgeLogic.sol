@@ -78,6 +78,16 @@ contract BridgeLogic is IBridgeLogic, Ownable, Pausable {
         );
     }
 
+    // test only function
+    function verifySignature(
+        bytes32 hash,
+        bytes calldata _sigs
+    ) external view returns (bool) {
+        address[] memory keepers = IBridgeData(dataAddr).getKeepers();
+        uint256 n = keepers.length;
+        return Utils.verifySigs(hash, _sigs, keepers, n - (n - 1) / 3);
+    }
+
     function updateKeepers(
         address[] calldata _newKeepers,
         bytes calldata _sigs
