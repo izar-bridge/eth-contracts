@@ -9,8 +9,8 @@ import "openzeppelin-contracts/contracts/security/Pausable.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract BridgeLogic is IBridgeLogic, Ownable, Pausable {
-    address private immutable proxyAddr;
-    address private immutable dataAddr;
+    address public immutable proxyAddr;
+    address public immutable dataAddr;
 
     constructor(address _proxyAddr, address _dataAddr) {
         proxyAddr = _proxyAddr;
