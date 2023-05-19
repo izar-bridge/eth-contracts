@@ -40,11 +40,12 @@ contract DeployAll is Script {
         data.addWhiteListFrom(address(lockProxy));
         data.addWhiteListTo(address(lockProxy));
 
-        new WrapperV1(
+        WrapperV1 wrapper = new WrapperV1(
             vm.addr(deployerPrivateKey),
             vm.addr(deployerPrivateKey),
             aleoChainID
         );
+        wrapper.setLockProxy(address(lockProxy));
 
         vm.stopBroadcast();
     }
