@@ -30,6 +30,12 @@ contract DeployAll is Script {
 
         LockProxyV1 lockProxy = new LockProxyV1();
         lockProxy.setBridgeProxy(address(proxy));
+        lockProxy.bindProxyHash(aleoChainID, "zkETH.aleo");
+        lockProxy.bindAssetHash(
+            address(0x0000000000000000000000000000000000000000),
+            aleoChainID,
+            "zkETH.aleo"
+        );
 
         data.addWhiteListFrom(address(lockProxy));
         data.addWhiteListTo(address(lockProxy));

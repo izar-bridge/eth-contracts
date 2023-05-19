@@ -36,6 +36,13 @@ contract LockProxyV1 is Ownable, Pausable, ILockProxy {
         uint256 amount
     );
     event UnlockEvent(address toAssetHash, address toAddress, uint256 amount);
+    event BindProxyEvent(uint64 toChainId, bytes targetProxyHash);
+    event BindAssetEvent(
+        address fromAssetHash,
+        uint64 toChainId,
+        bytes targetProxyHash,
+        uint initialAmount
+    );
 
     function pause() external onlyOwner {
         _pause();
@@ -125,6 +132,43 @@ contract LockProxyV1 is Ownable, Pausable, ILockProxy {
 
         emit UnlockEvent(toAssetHash, toAddress, args.amount);
         return true;
+    }
+
+    function bindProxyHash(
+        uint64 toChainId,
+        bytes memory targetProxyHash
+    ) public onlyOwner returns (bool) {
+        proxyHashMap[toChainId] = targetProxyHash;
+        emit BindProxyEvent(toChainId, targetProxyHash);
+        return true;
+    }
+
+    function bindAssetHash(
+        address fromAssetHash,
+        uint64 toChainId,
+        bytes memory toAssetHash
+    ) public onlyOwner returns (bool) {
+        assetHashMap[fromAssetHash][toChainId] = toAssetHash;
+        emit BindAssetEvent(
+            fromAssetHash,
+            toChainId,
+            toAssetHash,
+            getBalanceFor(fromAssetHash)
+        );
+        return true;
+    }
+
+    function getBalanceFor(
+        address fromAssetHash
+    ) public view returns (uint256) {
+        if (fromAssetHash == address(0)) {
+            // return address(this).balance; // this expression would result in error: Failed to decode output: Error: insufficient data for uint256 type
+            address selfAddr = address(this);
+            return selfAddr.balance;
+        } else {
+            IERC20 erc20Token = IERC20(fromAssetHash);
+            return erc20Token.balanceOf(address(this));
+        }
     }
 
     function _transferFromContract(
