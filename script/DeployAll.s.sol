@@ -43,7 +43,7 @@ contract DeployAll is Script {
         WrapperV1 wrapper = new WrapperV1(
             vm.addr(deployerPrivateKey),
             vm.addr(deployerPrivateKey),
-            aleoChainID
+            ethChainID
         );
         wrapper.setLockProxy(address(lockProxy));
 
