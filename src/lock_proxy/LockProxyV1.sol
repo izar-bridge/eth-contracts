@@ -53,10 +53,7 @@ contract LockProxyV1 is Ownable, Pausable, ILockProxy {
     }
 
     modifier onlyBridgeProxy() {
-        require(
-            _msgSender() == IBridgeProxy(bridgeProxy).logic(),
-            "msg.sender is not bridgeProxy"
-        );
+        require(_msgSender() == bridgeProxy, "msg.sender is not bridgeProxy");
         _;
     }
 
@@ -107,7 +104,7 @@ contract LockProxyV1 is Ownable, Pausable, ILockProxy {
     }
 
     function onReceive(
-        uint64 /*_srcChainID*/,
+        uint16 /*_srcChainID*/,
         bytes calldata _srcAddress,
         uint256 /*_nonce*/,
         bytes calldata _payload
