@@ -178,7 +178,8 @@ contract LockProxyV1 is Ownable, Pausable, ILockProxy {
         ) {
             // toAssetHash === address(0) denotes contract needs to unlock ether to toAddress
             // convert toAddress from 'address' type to 'address payable' type, then actively transfer ether
-            payable(address(uint160(toAddress))).transfer(amount);
+            (bool success, ) = payable(address(uint160(toAddress))).call{value: amount}("");
+            require(success, "Failed to transfer funds to the address");
         } else {
             // actively transfer amount of asset from lock_proxy contract to toAddress
             require(

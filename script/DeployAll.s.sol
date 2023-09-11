@@ -17,7 +17,7 @@ contract DeployAll is Script {
 
         BridgeProxy proxy = new BridgeProxy();
 
-        uint16 ethChainID = 1;
+        uint16 ethChainID = 4;
         uint16 aleoChainID = 2;
         address[] memory keepers = new address[](2);
         keepers[0] = 0xffeE66e54107E16Ea5bBe3230c7BcCFcAeE03346;
@@ -30,11 +30,11 @@ contract DeployAll is Script {
 
         LockProxyV1 lockProxy = new LockProxyV1();
         lockProxy.setBridgeProxy(address(proxy));
-        lockProxy.bindProxyHash(aleoChainID, "zkETH.aleo");
+        lockProxy.bindProxyHash(aleoChainID, "zkETH.zksync");
         lockProxy.bindAssetHash(
             address(0x0000000000000000000000000000000000000000),
             aleoChainID,
-            "zkETH.aleo"
+            "zkETH.zksync"
         );
 
         data.addWhiteListFrom(address(lockProxy));
