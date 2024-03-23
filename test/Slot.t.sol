@@ -11,7 +11,7 @@ contract SlotTest is Test {
     function setUp() public {}
 
     function testSlot() public {
-        uint v = 123 | (456 << 64) | (789 << 96);
+        uint256 v = 123 | (456 << 64) | (789 << 96);
         assembly {
             sstore(sequenceNumber.slot, v)
         }
@@ -20,5 +20,13 @@ contract SlotTest is Test {
         assertEq(sequenceNumber, 123);
         assertEq(blobBaseFeeScalar, 456);
         assertEq(baseFeeScalar, 789);
+    }
+
+    function testPadding() public {
+        address v = address(1);
+        // bytes32 right pads its argument
+        // but uint160 assumes the argument to be left padded
+        assertNotEq(address(uint160(uint256(bytes32(bytes20(v))))), v);
+        assertEq(address(uint160(uint256(bytes32(bytes20(v))))), address(uint160(1 << 96)));
     }
 }
