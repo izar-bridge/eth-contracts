@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "../src/core/BridgeData.sol";
@@ -31,20 +31,12 @@ contract DeployAll is Script {
         LockProxyV1 lockProxy = new LockProxyV1();
         lockProxy.setBridgeProxy(address(proxy));
         lockProxy.bindProxyHash(aleoChainID, "zkETH.aleo");
-        lockProxy.bindAssetHash(
-            address(0x0000000000000000000000000000000000000000),
-            aleoChainID,
-            "zkETH.aleo"
-        );
+        lockProxy.bindAssetHash(address(0x0000000000000000000000000000000000000000), aleoChainID, "zkETH.aleo");
 
         data.addWhiteListFrom(address(lockProxy));
         data.addWhiteListTo(address(lockProxy));
 
-        WrapperV1 wrapper = new WrapperV1(
-            vm.addr(deployerPrivateKey),
-            vm.addr(deployerPrivateKey),
-            ethChainID
-        );
+        WrapperV1 wrapper = new WrapperV1(vm.addr(deployerPrivateKey), vm.addr(deployerPrivateKey), ethChainID);
         wrapper.setLockProxy(address(lockProxy));
 
         vm.stopBroadcast();
