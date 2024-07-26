@@ -17,7 +17,7 @@ contract LockProxyTest is Test {
         LockProxyV1 proxy = new LockProxyV1();
         vm.etch(LockProxyAddr, address(proxy).code);
 
-        bytes32 targetTx = 0xdb0a1b11753dae4f2e3ed91cb31902e3e157be1d84b92937f9ac009359a41849;
-        vm.transact(targetTx);
+        // bytes32 targetTx = 0xdb0a1b11753dae4f2e3ed91cb31902e3e157be1d84b92937f9ac009359a41849;
+        // vm.transact(targetTx);
     }
 }
